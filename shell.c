@@ -14,7 +14,7 @@ int main()
 	int num = 0;
 	char *BUF = NULL;
 
-	write(1, "~ ", 2);
+	write(1, "$ ", 2);
 	num = getline(&BUF, &size_BUF, stdin);
 	if (num == EOF)
 		perror("getline");
