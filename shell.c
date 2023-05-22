@@ -15,11 +15,11 @@ char **split_string(char *str)
 	int n = 0;
 
 	toks = malloc(sizeof(char *) * 1024);
-                if (toks == NULL)
-                {
-                        perror("malloc");
-                        exit(EXIT_FAILURE);
-                }
+		if (toks == NULL)
+		{
+			perror("malloc");
+			exit(EXIT_FAILURE);
+		}
 	while (*str != '\0')
 	{
 		while (*str == ' ')
@@ -69,6 +69,7 @@ int main(void)
 	}
 	else if (pid == 0)
 	{
+		toks = split_string(command);
 		if (execve(toks[0], toks, NULL) == -1)
 		{
 			perror("execve");
@@ -78,6 +79,7 @@ int main(void)
 	else
 		wait(&status);
 	}
+	free(toks);
 	free(command);
 	return (0);
 }
