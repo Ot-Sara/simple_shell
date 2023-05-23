@@ -105,7 +105,7 @@ int main(int ac, char **av, char **env)
 	ssize_t num;
 	pid_t pid;
 	int status;
-	char *str = NULL;
+	char *str = NULL, *command;
 	char **toks = NULL;
 	(void)ac;
 	(void)av;
@@ -123,6 +123,12 @@ int main(int ac, char **av, char **env)
 
 	if (strcmp(toks[0], "exit") == 0)
 		exit(0);
+	command = get_command(toks[0]);
+	if (!command)
+	{
+		free(toks);
+		continue;
+	}
 	pid = fork();
 	if (pid < 0)
 	{
@@ -130,11 +136,9 @@ int main(int ac, char **av, char **env)
 		exit(EXIT_FAILURE); }
 	else if (pid == 0)
 	{
-		str = get_command(toks[0]);
-		if (str)
-			execve(str, toks, env);
-		else
-		exit(0); }
+		execve(command, toks, env);
+		perror("execve");
+		exit(EXIT_FAILURE); }
 	else
 		wait(&status);
 	free(toks); }
