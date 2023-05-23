@@ -85,32 +85,3 @@ char **strtow(char *p)
 	matrix[k] = NULL;
 	return (matrix);
 }
-
-/**
- * main - Entry point
- *
- * Return: 0 success
- */
-
-int main(void)
-{
-	char a[] = "Hello World! Welcome to the program";
-	char **words = strtow(a);
-	int i = 0, j = 0;
-
-	while (words == NULL)
-	{       
-		printf("Failed to split the string into words\n");
-		return (1);
-        }
-	while (words[i] != NULL)
-	{
-		printf("%s\n", words[i]);
-		i++;
-	}
-	for (j = 0; j < i; j++)
-		free(words[j]);
-	free(words);
-	return (0);
-}
-

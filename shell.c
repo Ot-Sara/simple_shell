@@ -89,6 +89,19 @@ char **split_string(char *str, char *delimiter)
 	toks[n] = NULL;
 	return (toks);
 }
+/**
+ * print_env - prints the environment variables
+ * @env: th environment to print
+ */
+
+void print_env(char **env)
+{
+	while (*env)
+	{
+		printf ("%s\n", *env);
+		env++;
+	}
+}
 
 /**
  * main - Entry point
@@ -123,6 +136,12 @@ int main(int ac, char **av, char **env)
 
 	if (strcmp(toks[0], "exit") == 0)
 		exit(0);
+	else if (strcmp(toks[0], "env") == 0)
+	{
+		 print_env(env);
+		 free(toks);
+		 continue;
+	}
 	command = get_command(toks[0]);
 	if (!command)
 	{
