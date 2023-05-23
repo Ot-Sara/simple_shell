@@ -136,8 +136,8 @@ int main(int ac, char **av, char **env)
 		else
 		exit(0); }
 	else
-		wait(&status); }
+		wait(&status);
+	free(toks); }
 	free(str);
-	free(toks);
 	return (0);
 }
