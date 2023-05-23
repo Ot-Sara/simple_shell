@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 /**
  * _getenv - 
@@ -13,18 +14,18 @@
 char *_getenv(const char *name)
 {
 	int i = 0;
-	size_t name_len;
+	char *key;
 	extern char **environ;
 
-	name_len = strlen(name);
-	while(environ[i])
+	while (environ[i])
 	{
-		if (strncmp(environ[i], name, name_len) == 0 &&
-				strcmp(environ[i] + name_len, "=") == 0)
-			return (environ[i] + name_len + 1);
+		key = strtok(environ[i], "=");
+		if (strcmp(name, key) == 0)
+			return (strtok(NULL, "\n"));
 		i++;
 	}
 	return (NULL);
+
 }
 
 /**
@@ -32,7 +33,35 @@ char *_getenv(const char *name)
  * @str: the string to return
  * Return: an array of strings
  */
-char **split_string(char *str)
+
+
+char *get_command(char *command)
+{
+        char *path = _getenv("PATH");
+        char *token;
+        char *cmd_full;
+        struct stat st;
+
+        token = strtok(path, ":");
+        while (token)
+        {
+                cmd_full = malloc(strlen(token) + strlen(command) + 2);
+                strcpy(cmd_full, token);
+                strcat(cmd_full, "/");
+                strcat(cmd_full, command);
+
+                if (stat(cmd_full, &st) == 0)
+                        return (cmd_full);
+
+
+                free(cmd_full);
+                token = strtok(NULL, ":");
+        }
+        return (NULL);
+}
+
+
+char **split_string(char *str, char *del)
 {
 	char *tok, **toks;
 	int n = 0;
@@ -43,20 +72,15 @@ char **split_string(char *str)
 			perror("malloc");
 			exit(EXIT_FAILURE);
 		}
-	while (*str != '\0')
+	tok = strtok(str, del);
+
+	while (tok)
 	{
-		while (*str == ' ')
-			str++;
-		if (*str == '\0')
-			break;
+		toks[n] = tok;
+		tok = strtok(NULL, del);
 		n++;
-		tok = str;
-		while (*str != ' ' && *str != '\0')
-			str++;
-		if (*str != '\0')
-			*str = '\0';
-		toks[n - 1] = tok;
 	}
+	toks[n] = NULL;
 	return (toks);
 }
 /**
@@ -65,25 +89,35 @@ char **split_string(char *str)
  * Return: 0 (SUCCESS)
  */
 
-int main(void)
+int main(int ac, char **av, char **env)
 {
+
 	size_t command_size = 0;
 	ssize_t num;
 	pid_t pid;
 	int status;
 	char *command = NULL;
 	char **toks = NULL;
+	char *cmd;
+
+	(void)ac;
+	(void)av;
 
 	while (1)
 	{
 		write(1, "#cisfun$ ", 9);
 	num = getline(&command, &command_size, stdin);
-	if (num == EOF)
+	if (num == -1)
 	{
 		perror("getline");
-		break;
+		exit(1);
 	}
 	command[num - 1] = '\0';
+	toks = split_string(command, " \t\n");
+
+	if (strcmp(toks[0], "exit") == 0)
+		exit (0);
+
 	pid = fork();
 	if (pid < 0)
 	{
@@ -92,17 +126,16 @@ int main(void)
 	}
 	else if (pid == 0)
 	{
-		toks = split_string(command);
-		if (execve(toks[0], toks, NULL) == -1)
-		{
-			perror("execve");
-			exit(EXIT_FAILURE);
-		}
+		cmd = get_command(toks[0]);
+		
+		if (cmd)
+			execve(cmd, toks, env);
+		else
+			printf("Command not found\n");
+		exit(0);
 	}
 	else
 		wait(&status);
 	}
-	free(toks);
-	free(command);
 	return (0);
-}
+} 
