@@ -5,6 +5,29 @@
 #include <sys/wait.h>
 
 /**
+ * _getenv - 
+ * @name:
+ * Return: the value
+ */
+
+char *_getenv(const char *name)
+{
+	int i = 0;
+	size_t name_len;
+	extern char **environ;
+
+	name_len = strlen(name);
+	while(environ[i])
+	{
+		if (strncmp(environ[i], name, name_len) == 0 &&
+				strcmp(environ[i] + name_len, "=") == 0)
+			return (environ[i] + name_len + 1);
+		i++;
+	}
+	return (NULL);
+}
+
+/**
  * split_string - splits and returns an array of strings
  * @str: the string to return
  * Return: an array of strings
