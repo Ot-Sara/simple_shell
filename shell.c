@@ -6,32 +6,30 @@
 #include <sys/stat.h>
 
 /**
- * _getenv - retrieves the value of an environment variable
- * @name: the name of the environment variable we want to
- * retrieve the value for
- * Return: the value
+ * _getenv - return the value of a spesific key
+ * @name: the key to manipulate
+ * Return: char*
  */
 
 /*
- * Declaration for accessing environment variables
+ * Acces the environment variables using extern
  */
 extern char **environ;
 
 char *_getenv(const char *name)
 {
-	int i = 0;
+	int l = 0;
 	char *key;
 
-	while (environ[i])
+	while (environ[l])
 	{
-		key = strtok(environ[i], "=");
+		key = strtok(environ[l], "=");
 		if (strcmp(name, key) == 0)
 			return (strtok(NULL, "\n"));
-		i++;
+		l++;
 	}
 	return (NULL);
 }
-
 /**
  * get_command - finds the path and stick it to the command
  * @cmd: the command entered by the user
