@@ -8,7 +8,6 @@
 
 char *_getenv(const char *name)
 {
-<<<<<<< HEAD
 	int i = 0;
 	char *key;
 	char *value;
@@ -22,19 +21,6 @@ char *_getenv(const char *name)
 		i++;
 	}
 	return (NULL);
-=======
-	int l = 0;
-	char *key;
-
-	while (environ[l])
-		{
-		key = strtok(environ[l], "=");
-		if (strcmp(name, key) == 0)
-		return (strtok(NULL, "\n"));
-		l++;
-		}
-		return (NULL);
->>>>>>> ac8d8435a1d76bab40489442088b2c73ec78f2ae
 }
 
 /**
@@ -54,23 +40,16 @@ char *get_command(char *cmd)
 	while (tok)
 	{
 		command = malloc(strlen(tok) + strlen(cmd) + 2);
-<<<<<<< HEAD
 		if (!command)
 		{
 			perror("malloc");
-			exit(EXIT_FAILURE); }
-=======
->>>>>>> ac8d8435a1d76bab40489442088b2c73ec78f2ae
+			exit(EXIT_FAILURE);
 		strcpy(command, tok);
 		strcat(command, "/");
 		strcat(command, cmd);
 
 		if (stat(command, &st) == 0)
-<<<<<<< HEAD
 			return (command);
-=======
-		return (command);
->>>>>>> ac8d8435a1d76bab40489442088b2c73ec78f2ae
 
 		free(command);
 		tok = strtok(NULL, ":");
@@ -91,19 +70,16 @@ char **split_string(char *str, char *delimiter)
 	int n = 0;
 
 	toks = malloc(sizeof(char *) * 1024);
-<<<<<<< HEAD
 	if (!toks)
 	{
 		perror("malloc");
 		exit(EXIT_FAILURE);
 	}
-=======
 		if (toks == NULL)
 		{
 			perror("malloc");
 			exit(EXIT_FAILURE);
 		}
->>>>>>> ac8d8435a1d76bab40489442088b2c73ec78f2ae
 	tok = strtok(str, delimiter);
 
 	while (tok)
