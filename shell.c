@@ -108,44 +108,37 @@ void print_env(char **env)
 
 int main(int ac, char **av, char **env)
 {
-
-	size_t str_size = 0;
-	ssize_t num;
+	char *buffer = NULL;
+	size_t buffer_size = 0;
+	char *cmd;
+	char **args;
 	pid_t pid;
-	int status;
-	char *str = NULL;
-	char **toks = NULL;
-	(void)ac;
-	(void)av;
+	int status, n;
 
 	while (1)
 	{
-		write(1, "#cisfun$ ", 9);
-	num = getline(&str, &str_size, stdin);
-	if (num == -1)
-	{
-		write(1, "\n", 1);
-		exit(1); }
-	str[num - 1] = '\0';
-	toks = split_string(str, " ");
-
-	if (strcmp(toks[0], "exit") == 0)
-		exit(0);
-	pid = fork();
-	if (pid < 0)
-	{
-		perror("fork");
-		exit(EXIT_FAILURE); }
-	else if (pid == 0)
-	{
-		str = get_command(toks[0]);
-		if (str)
-			execve(str, toks, env);
+		write(1, "$ ", 2);
+		n = getline(&buffer, &buffer_size, stdin);
+		if (n == -1)
+		{
+			write(1, "\n", 1);
+			exit(1);
+		}
+		args = split_string(buffer, " \t\n");
+		if (strcmp(args[0], "exit") == 0)
+			exit(0);
+		pid = fork();
+		if (pid == 0)
+		{
+			cmd = get_command(args[0]);
+			if (cmd)
+				execve(cmd, args, env);
+			else
+				printf("Command not found\n");
+			exit(0);
+		}
 		else
-		exit(0); }
-	else
-		wait(&status);
-	free(toks); }
-	free(str);
+			wait(&status);
+	}
 	return (0);
 }
