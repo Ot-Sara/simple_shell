@@ -81,6 +81,12 @@ char **split_string(char *str, char *delimiter)
 		tok = strtok(NULL, delimiter);
 		n++;
 	}
+	if (n == 0)
+	{
+		free(toks);
+		return (NULL);
+	}
+
 	toks[n] = NULL;
 	return (toks);
 }
