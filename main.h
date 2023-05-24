@@ -7,7 +7,6 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
-#include "env.h"
 #include <fcntl.h>
 
 extern char **environ;
