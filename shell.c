@@ -4,17 +4,12 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
-
+#include <env.h>
 /**
  * _getenv - return the value of a spesific key
  * @name: the key to manipulate
  * Return: char*
  */
-
-/*
- * Acces the environment variables using extern
- */
-extern char **environ;
 
 char *_getenv(const char *name)
 {
@@ -98,7 +93,7 @@ void print_env(char **env)
 {
 	while (*env)
 	{
-		printf ("%s\n", *env);
+		printf("%s\n", *env);
 		env++;
 	}
 }
