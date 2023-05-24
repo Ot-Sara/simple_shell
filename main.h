@@ -10,6 +10,7 @@
 #include "env.h"
 #include <fcntl.h>
 
+extern char **environ;
 
 char *_getenv(const char *name);
 char *get_command(char *cmd);
