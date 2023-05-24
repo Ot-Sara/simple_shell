@@ -4,17 +4,13 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
-
+#include "env.h"
+#include <fcntl.h>
 /**
  * _getenv - return the value of a spesific key
  * @name: the key to manipulate
  * Return: char*
  */
-
-/*
- * Acces the environment variables using extern
- */
-extern char **environ;
 
 char *_getenv(const char *name)
 {
@@ -41,7 +37,6 @@ char *get_command(char *cmd)
 	char *P = _getenv("PATH");
 	char *tok;
 	char *command;
-	struct stat st;
 
 	tok = strtok(P, ":");
 	while (tok)
@@ -51,7 +46,7 @@ char *get_command(char *cmd)
 		strcat(command, "/");
 		strcat(command, cmd);
 
-		if (stat(command, &st) == 0)
+		if (access(command, F_OK) == 0)
 			return (command);
 
 		free(command);
@@ -86,71 +81,66 @@ char **split_string(char *str, char *delimiter)
 		tok = strtok(NULL, delimiter);
 		n++;
 	}
-	toks[n] = NULL;
-	return (toks);
-}
-/**
- * print_env - prints the environment variables
- * @env: th environment to print
- */
-
-void print_env(char **env)
-{
-	while (*env)
+	if (n == 0)
 	{
+<<<<<<< HEAD
 		printf("%s\n", *env);
 		env++;
+=======
+		free(toks);
+		return (NULL);
+>>>>>>> 614d4c6d2151c4f736f9fab7fd7c161b5433376e
 	}
+
+	toks[n] = NULL;
+	return (toks);
 }
 
 /**
  * main - Entry point
- * @ac: the number of items in av
- * @av: an array of strings
- * @env: the environment path
  * Return: 0 (SUCCESS)
  */
 
-int main(int ac, char **av, char **env)
+int main(void)
 {
-
-	size_t str_size = 0;
-	ssize_t num;
+	char *buffer = NULL;
+	size_t buffer_size = 0;
+	char *cmd;
+	char **args;
 	pid_t pid;
 	int status;
-	char *str = NULL;
-	char **toks = NULL;
-	(void)ac;
-	(void)av;
 
 	while (1)
 	{
 		write(1, "#cisfun$ ", 9);
-	num = getline(&str, &str_size, stdin);
-	if (num == -1)
-	{
-		write(1, "\n", 1);
-		exit(1); }
-	str[num - 1] = '\0';
-	toks = split_string(str, " ");
-
-	if (strcmp(toks[0], "exit") == 0)
-		exit(0);
-	pid = fork();
-	if (pid < 0)
-	{
-		perror("fork");
-		exit(EXIT_FAILURE); }
-	else if (pid == 0)
-	{
-		str = get_command(toks[0]);
-		if (str)
-			execve(str, toks, env);
+		if (getline(&buffer, &buffer_size, stdin) == -1)
+		{
+			write(1, "\n", 1);
+			exit(1);
+		}
+		args = split_string(buffer, " \t\n");
+		if (strcmp(args[0], "exit") == 0)
+			exit(0);
+		pid = fork();
+		if (pid == 0)
+		{
+			cmd = get_command(args[0]);
+			if (cmd == NULL)
+			{
+				write(2, args[0], strlen(args[0]));
+				write(2, ": command not found\n", 20);
+				exit(127);
+			}
+			else if (execve(cmd, args, environ) == -1)
+			{
+				write(2, args[0], strlen(args[0]));
+				write(2, ": execution error\n", 18);
+				exit(EXIT_FAILURE);
+			}
+			exit(0);
+		}
 		else
-		exit(0); }
-	else
-		wait(&status);
-	free(toks); }
-	free(str);
+			wait(&status);
+	}
 	return (0);
 }
