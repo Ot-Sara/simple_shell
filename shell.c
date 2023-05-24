@@ -43,7 +43,7 @@ int main(int argc, char *args[], char **env)
 			exit(EXIT_FAILURE);
 		}
 		if (wpid == 0)
-			_execute(buff, statbuf, env);
+			_execute(buff, &statbuf, env);
 		if (waitpid(wpid, &wstatus, 0) == -1)
 		{
 			perror("wait");

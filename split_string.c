@@ -10,11 +10,8 @@
 
 char **split_string(char *str, char *separators, int *word_count)
 {
-	int c;
 	unsigned int v;
 	char **words;
-	char *str_ptr = str;
-	bool start = false;
 	unsigned int no_of_words;
 	unsigned int word_sizes[MAX_WORD_COUNT];
 
@@ -24,7 +21,7 @@ char **split_string(char *str, char *separators, int *word_count)
 	if (no_of_words == 0)
 		return (NULL);
 
-	words = malloc((sizeof(char *) * no_of_words) + 1);
+	words = malloc(sizeof(char *) * (no_of_words + 1));
 	if (!words)
 		return (NULL);
 
@@ -33,11 +30,14 @@ char **split_string(char *str, char *separators, int *word_count)
 		words[v] = malloc(sizeof(char) * (word_sizes[v] + 1));
 		if (!words[v])
 		{
-			for (v--; v >= 0; v--)
-				free(words[v]);
+			for (; v > 0; v--)
+				free(words[v - 1]);
 			free(words);
 			return (NULL);
 		}
 	}
-	return (words);
+	if (word_count != NULL)
+		*word_count = no_of_words;
+
+	return words;
 }
