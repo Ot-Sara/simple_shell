@@ -114,7 +114,8 @@ int main(int ac, char **av, char **env)
 	char **args;
 	pid_t pid;
 	int status, n;
-
+	(void)ac;
+	(void)av;
 	while (1)
 	{
 		write(1, "$ ", 2);
