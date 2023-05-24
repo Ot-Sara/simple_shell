@@ -44,6 +44,7 @@ char *get_command(char *cmd)
 		{
 			perror("malloc");
 			exit(EXIT_FAILURE);
+		}
 		strcpy(command, tok);
 		strcat(command, "/");
 		strcat(command, cmd);
