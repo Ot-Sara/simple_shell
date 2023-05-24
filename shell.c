@@ -98,7 +98,7 @@ void print_env(char **env)
 {
 	while (*env)
 	{
-		printf ("%s\n", *env);
+		printf("%s\n", *env);
 		env++;
 	}
 }
