@@ -39,5 +39,5 @@ char **split_string(char *str, char *separators, int *word_count)
 	if (word_count != NULL)
 		*word_count = no_of_words;
 
-	return words;
+	return (words);
 }

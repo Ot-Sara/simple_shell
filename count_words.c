@@ -6,7 +6,7 @@
  * count_words - counts
  * @str: string
  * @sep: seperator
- * @size
+ * @size: the size
  * Return: unsigned int
  */
 unsigned int count_words(char *str, char *sep, unsigned int *size)
