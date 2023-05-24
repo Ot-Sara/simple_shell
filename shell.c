@@ -19,11 +19,12 @@ int main(int ac, char **av, char **env)
 
 	while (1)
 	{
-		if (isatty(STDIN_FILENO))
+		if (isatty(STDIN_FILENO) == 0)
 			write(1, "#cisfun$ ", 9);
 		num = getline(&str, &str_size, stdin);
 		if (num == -1)
 		{
+			write(1, "\n", 1);
 			exit(EXIT_SUCCESS); }
 		str[num - 1] = '\0';
 		toks = split_string(str, " ");
