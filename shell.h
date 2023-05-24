@@ -17,6 +17,6 @@ char **split_string(char *str, char *separators, int *word_count);
 int _execute(char *arguments, struct stat *statbuf, char **env);
 bool check_file_status(char *pathname, struct stat *statbuf);
 void set_zeros(unsigned int *arr, unsigned int size);
-unsigned int count_words(char *str, char *sep, unsigned int size);
+unsigned int count_words(char *str, char *sep, unsigned int *size);
 
 #endif

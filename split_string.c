@@ -30,7 +30,7 @@ char **split_string(char *str, char *separators, int *word_count)
 
 	for (v = 0; v < no_of_words; v++)
 	{
-		words[v] = malloc((sizeof(char) * word_sizes[v]) + 1);
+		words[v] = malloc(sizeof(char) * (word_sizes[v] + 1));
 		if (!words[v])
 		{
 			for (v--; v >= 0; v--)

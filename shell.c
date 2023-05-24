@@ -1,6 +1,6 @@
 #include "shell.h"
 #include <stdio.h>
-#include <stdio.h>
+#include <stdlib.h>
 
 /**
  * main - entry
@@ -35,7 +35,7 @@ int main(int argc, char *args[], char **env)
 			exit(EXIT_FAILURE);
 		}
 		if (buff[bytes - 1] == '\n')
-			buff[bytes - 1] = '\n';
+			buff[bytes - 1] = '\0';
 		wpid = fork();
 		if (wpid == -1)
 		{
@@ -43,14 +43,14 @@ int main(int argc, char *args[], char **env)
 			exit(EXIT_FAILURE);
 		}
 		if (wpid == 0)
-			_execute(buff, &statbuf, env);
+			_execute(buff, statbuf, env);
 		if (waitpid(wpid, &wstatus, 0) == -1)
 		{
 			perror("wait");
 			exit(EXIT_FAILURE);
 		}
+		free(buff);
 	}
-	free(buff);
 	return (0);
 }
 
@@ -66,7 +66,6 @@ int _execute(char *arguments, struct stat *statbuf, char **env)
 {
 	int argc;
 	char **argv;
-	char *exe;
 
 	argv = split_string(arguments, " ", &argc);
 	if (!check_file_status(argv[0], statbuf))
@@ -75,6 +74,7 @@ int _execute(char *arguments, struct stat *statbuf, char **env)
 		exit(EXIT_FAILURE);
 	}
 	execve(argv[0], argv, env);
+	exit(EXIT_SUCCESS);
 
 	perror("execve");
 	exit(EXIT_FAILURE);
