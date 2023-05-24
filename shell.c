@@ -132,10 +132,16 @@ int main(int ac, char **av, char **env)
 		if (pid == 0)
 		{
 			cmd = get_command(args[0]);
-			if (cmd)
-				execve(cmd, args, env);
-			else
-				printf("Command not found\n");
+			if (cmd == NULL)
+			{
+				fprintf(stderr, "%s: command not found\n", args[0]);
+				exit(127);
+			}
+			else if (execve(cmd, args, env) == -1)
+			{
+				fprintf(stderr, "%s: execution error\n", args[0]);
+				exit(EXIT_FAILURE);
+			}
 			exit(0);
 		}
 		else
