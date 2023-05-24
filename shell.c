@@ -118,7 +118,7 @@ int main(int ac, char **av, char **env)
 	(void)av;
 	while (1)
 	{
-		write(1, "$ ", 2);
+		write(1, "#cisfun$ ", 9);
 		n = getline(&buffer, &buffer_size, stdin);
 		if (n == -1)
 		{
