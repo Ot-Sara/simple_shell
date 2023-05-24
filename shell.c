@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include "env.h"
+#include <fcntl.h>
 /**
  * _getenv - return the value of a spesific key
  * @name: the key to manipulate
@@ -36,7 +37,6 @@ char *get_command(char *cmd)
 	char *P = _getenv("PATH");
 	char *tok;
 	char *command;
-	struct stat st;
 
 	tok = strtok(P, ":");
 	while (tok)
@@ -46,7 +46,7 @@ char *get_command(char *cmd)
 		strcat(command, "/");
 		strcat(command, cmd);
 
-		if (stat(command, &st) == 0)
+		if (access(command, F_OK) == 0)
 			return (command);
 
 		free(command);
@@ -87,27 +87,22 @@ char **split_string(char *str, char *delimiter)
 
 /**
  * main - Entry point
- * @ac: the number of items in av
- * @av: an array of strings
- * @env: the environment path
  * Return: 0 (SUCCESS)
  */
 
-int main(int ac, char **av, char **env)
+int main(void)
 {
 	char *buffer = NULL;
 	size_t buffer_size = 0;
 	char *cmd;
 	char **args;
 	pid_t pid;
-	int status, n;
-	(void)ac;
-	(void)av;
+	int status;
+
 	while (1)
 	{
 		write(1, "#cisfun$ ", 9);
-		n = getline(&buffer, &buffer_size, stdin);
-		if (n == -1)
+		if (getline(&buffer, &buffer_size, stdin) == -1)
 		{
 			write(1, "\n", 1);
 			exit(1);
@@ -121,12 +116,14 @@ int main(int ac, char **av, char **env)
 			cmd = get_command(args[0]);
 			if (cmd == NULL)
 			{
-				fprintf(stderr, "%s: command not found\n", args[0]);
+				write(2, args[0], strlen(args[0]));
+				write(2, ": command not found\n", 20);
 				exit(127);
 			}
-			else if (execve(cmd, args, env) == -1)
+			else if (execve(cmd, args, environ) == -1)
 			{
-				fprintf(stderr, "%s: execution error\n", args[0]);
+				write(2, args[0], strlen(args[0]));
+				write(2, ": execution error\n", 18);
 				exit(EXIT_FAILURE);
 			}
 			exit(0);
