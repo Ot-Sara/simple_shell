@@ -84,19 +84,6 @@ char **split_string(char *str, char *delimiter)
 	toks[n] = NULL;
 	return (toks);
 }
-/**
- * print_env - prints the environment variables
- * @env: th environment to print
- */
-
-void print_env(char **env)
-{
-	while (*env)
-	{
-		printf("%s\n", *env);
-		env++;
-	}
-}
 
 /**
  * main - Entry point
