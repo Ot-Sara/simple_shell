@@ -10,7 +10,8 @@
 
 char **split_string(char *str, char *separators, int *word_count)
 {
-	int c, v;
+	int c;
+	unsigned int v;
 	char **words;
 	char *str_ptr = str;
 	bool start = false;
@@ -18,7 +19,7 @@ char **split_string(char *str, char *separators, int *word_count)
 	unsigned int word_sizes[MAX_WORD_COUNT];
 
 	set_zeros(word_sizes, MAX_WORD_COUNT);
-	no_of_words = count_words(str, seperators, word_sizes);
+	no_of_words = count_words(str, separators, word_sizes);
 
 	if (no_of_words == 0)
 		return (NULL);
@@ -38,4 +39,5 @@ char **split_string(char *str, char *separators, int *word_count)
 			return (NULL);
 		}
 	}
+	return (words);
 }

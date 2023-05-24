@@ -1,3 +1,4 @@
+#include "shell.c"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +9,7 @@
  * @size
  * Return: unsigned int
  */
-unsigned int count_words(char *str, char *sep, unsigned int size)
+unsigned int count_words(char *str, char *sep, unsigned int *size)
 {
 	unsigned int count = 0;
 	bool start = false;
@@ -28,7 +29,7 @@ unsigned int count_words(char *str, char *sep, unsigned int size)
 
 		if (start)
 		{
-			word_sizes[count - 1]++;
+			size[count - 1]++;
 		}
 
 		i++;

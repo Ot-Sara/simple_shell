@@ -1,4 +1,4 @@
-#include "main.h"
+#include "shell.h"
 #include <stdio.h>
 #include <stdio.h>
 
@@ -19,6 +19,8 @@ int main(int argc, char *args[], char **env)
 	int wstatus;
 	bool from_pipe = false;
 	struct stat statbuf;
+	(void)argc;
+	(void)args;
 
 	while (1 && !from_pipe)
 	{
@@ -72,7 +74,7 @@ int _execute(char *arguments, struct stat *statbuf, char **env)
 		perror("Error (file status)");
 		exit(EXIT_FAILURE);
 	}
-	execve(argv[0], argv, envp);
+	execve(argv[0], argv, env);
 
 	perror("execve");
 	exit(EXIT_FAILURE);

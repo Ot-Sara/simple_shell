@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "shell.h"
 /**
  * set_zeros - sets to zeros
  * @arr: arr
