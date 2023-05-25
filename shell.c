@@ -1,117 +1,85 @@
-#include "shell.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 /**
- * main - entry
- * @argc: argc
- * @args: args
- * @env: environement
- * Return: 0
+ * split_string - splits and returns an array of strings
+ * @str: the string to return
+ * @delimiter: the delimiter to check
+ * Return: an array of strings
+ */
+char **split_string(char *str, char *delimiter)
+{
+	char *tok, **toks = NULL;
+	int n = 0;
+
+	toks = malloc(sizeof(char *) * 1024);
+	if (toks == NULL)
+	{
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
+	if (toks == NULL)
+	{
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
+	tok = strtok(str, delimiter);
+	while (tok)
+	{
+		toks[n] = tok;
+		tok = strtok(NULL, delimiter);
+		n++;
+	}
+	toks[n] = NULL;
+	return (toks);
+}
+
+/**
+ * main - entry point
+ *
+ * Return: 0 (SUCCESS)
  */
 
-int main(int argc, char *args[], char **env)
+int main(void)
 {
-	char *buff = NULL, *prompt = "$ ";
-	size_t buff_size = 0;
-	ssize_t bytes;
-	pid_t wpid;
-	int wstatus;
-	bool from_pipe = false;
-	struct stat statbuf;
-	(void)argc;
-	(void)args;
+	size_t command_size = 0;
+	ssize_t num;
+	pid_t pid;
+	int status;
+	char *command = NULL, **toks = NULL;
 
-	while (1 && !from_pipe)
+	while (1)
 	{
-		if (isatty(STDIN_FILENO) == 0)
-<<<<<<< HEAD
-			write(1, "#cisfun$ ", 9);
-		num = getline(&str, &str_size, stdin);
-		if (num == -1)
+		write(1, "$ ", 2);
+		num = getline(&command, &command_size, stdin);
+		if (num == EOF)
 		{
-			write(1, "\n", 1);
-			exit(EXIT_SUCCESS); }
-		str[num - 1] = '\0';
-		toks = split_string(str, " ");
-		if (strcmp(toks[0], "exit") == 0)
-			exit(0);
+			perror("getline");
+			exit(EXIT_SUCCESS);
+		}
+		command[num - 1] = '\0';
+		toks = split_string(command, " ");
 		pid = fork();
 		if (pid < 0)
-=======
-			from_pipe = true;
-		write(STDOUT_FILENO, prompt, 2);
-		bytes = getline(&buff, &buff_size, stdin);
-		if (bytes == -1)
-		{
-			perror("ERROR getline");
-			free(buff);
-			exit(EXIT_FAILURE);
-		}
-		if (buff[bytes - 1] == '\n')
-			buff[bytes - 1] = '\0';
-		wpid = fork();
-		if (wpid == -1)
->>>>>>> c65837c30ff63ac1d3232011627fb2e727825942
 		{
 			perror("fork");
 			exit(EXIT_FAILURE);
 		}
-		if (wpid == 0)
-			_execute(buff, &statbuf, env);
-		if (waitpid(wpid, &wstatus, 0) == -1)
+		else if (pid == 0)
 		{
-			perror("wait");
-			exit(EXIT_FAILURE);
+			if (execve(command, toks, NULL) == -1)
+			{
+				perror("execve");
+				exit(EXIT_FAILURE);
+			}
 		}
-		free(buff);
+		else
+			wait(&status);
 	}
+	printf("Exit\n");
+	free(toks);
 	return (0);
-}
-
-/**
- * _execute - executes
- * @arguments: first arg
- * @statbuf: second arg
- * @env: environement
- * Return: int
- */
-
-int _execute(char *arguments, struct stat *statbuf, char **env)
-{
-	int argc;
-	char **argv;
-
-	argv = split_string(arguments, " ", &argc);
-	if (!check_file_status(argv[0], statbuf))
-	{
-		perror("Error (file status)");
-		exit(EXIT_FAILURE);
-	}
-	execve(argv[0], argv, env);
-	exit(EXIT_SUCCESS);
-
-	perror("execve");
-	exit(EXIT_FAILURE);
-}
-
-/**
- * check_file_status - checks the file
- * @pathname: pathname
- * @statbuf: statbuf
- * Return: bool
- */
-
-bool check_file_status(char *pathname, struct stat *statbuf)
-{
-	int stat_return;
-
-	stat_return = stat(pathname, statbuf);
-
-	if (stat_return == 0)
-	{
-		return (true);
-	}
-	return (false);
-
 }
