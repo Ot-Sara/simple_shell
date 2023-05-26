@@ -1,94 +1,157 @@
 #include "main.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/stat.h>
 
 /**
- * _getenv - return the value of a spesific key
- * @name: the key to manipulate
- * Return: char*
+ * hsh - main shell loop
+ * @data: the parameter & return info struct
+ * @av: the argument vector from main()
+ * Return: 0 on success, 1 on error, or error code
  */
 
-char *_getenv(const char *name)
+int hsh(data_t *data, char **av)
 {
-	int i = 0;
-	char *key;
+	ssize_t i = 0;
+	int built_ins = 0;
 
-	while (environ[i])
+	while (i != -1 && built_ins != -2)
 	{
-		key = strtok(environ[i], "=");
-		if (strcmp(name, key) == 0)
-			return (strtok(NULL, "\n"));
-		i++;
-	}
-	return (NULL);
-}
-/**
- * get_command - finds the path and stick it to the command
- * @cmd: the command entered by the user
- * Return: the whole path
- */
-
-char *get_command(char *cmd)
-{
-	char *P = _getenv("PATH");
-	char *tok;
-	char *command;
-	struct stat st;
-
-	tok = strtok(P, ":");
-	while (tok)
-	{
-		command = malloc(strlen(tok) + strlen(cmd) + 2);
-		if (!command)
+		clear_data(data);
+		if (inter(data))
+			puts("$ ");
+		_eputchar(BUF_FLUSH);
+		i = get_in(data);
+		if (i != -1)
 		{
-			perror("malloc");
-			exit(EXIT_FAILURE);
+			set_data(data, av);
+			built_ins = builtin_finder(data);
+			if (built_ins == -1)
+				cmd_finder(data);
 		}
-		strcpy(command, tok);
-		strcat(command, "/");
-		strcat(command, cmd);
-		if (stat(command, &st) == 0)
-			return (command);
-		free(command);
-		tok = strtok(NULL, ":");
+		else if (inter(data))
+			_putchar('\n');
+		free_data(data, 0);
 	}
-	return (NULL);
+	write_hist(data);
+	free_data(data, 1);
+	if (!inter(data) && data->status)
+		exit(data->status);
+	if (built_ins == -2)
+	{
+		if (data->err_n == -1)
+			exit(data->status);
+		exit(data->err_n);
+	}
+	return (built_ins);
 }
 
 /**
- * split_string - splits and returns an array of strings
- * @str: the string to return
- * @delimiter: the delimiter to check
- * Return: an array of strings
+ * builtin_finder - finds a builtin command
+ * @data: the parameter & return data struct
+ * Return: -1 if builtin not found, 0 if builtin executed
+ * successfully, 1 if builtin found but not successful,
+ * -2 if builtin signals exit()
  */
 
-char **split_string(char *str, char *delimiter)
+int builtin_finder(data_t *data)
 {
-	char *tok, **toks = NULL;
-	int n = 0;
+	int a, built_in = -1;
+	builtin_table builtin_tab[] = {
+		{"exit", my_exit},
+		{"env", my_env},
+		{"help", my_help},
+		{"hist", my_hist},
+		{"setenv", my_setenv},
+		{"unsetenv", my_unsetenv},
+		{"cd", my_cd},
+		{"alias", my_alias},
+		{NULL, NULL}
+	};
 
-	toks = malloc(sizeof(char *) * 1024);
-	if (toks == NULL)
+	for (a = 0; builtin_tab[a].type; a++)
+		if (strcmp(data->argv[0], builtin_tab[a].type) == 0)
+		{
+			data->l_count++;
+			built_in = builtin_tab[a].func(data);
+			break;
+		}
+	return (built_in);
+}
+
+/**
+ * cmd_finder - finds a command in PATH
+ * @data: the parameter & return data struct
+ * Return: void
+ */
+
+void cmd_finder(data_t *data)
+{
+	char *path = NULL;
+	int a, c;
+
+	data->path = data->argv[0];
+	if (data->lcount_flag == 1)
 	{
-		perror("malloc");
-		exit(EXIT_FAILURE);
+		data->l_count++;
+		data->lcount_flag = 0;
 	}
-	if (toks == NULL)
+	for (a = 0, c = 0; data->arg[i]; i++)
+		if (!del(data->arg[i], " \t\n"))
+			c++;
+	if (!c)
+		return;
+
+	path = path_finder(data, getenv(data, "PATH="), data->argv[0]);
+	if (path)
 	{
-		perror("malloc");
-		exit(EXIT_FAILURE);
+		data->path = path;
+		c_fork(data);
 	}
-	tok = strtok(str, delimiter);
-	while (tok)
+	else
 	{
-		toks[n] = tok;
-		tok = strtok(NULL, delimiter);
-		n++;
+		if ((inter(data) || getenv(data, "PATH=") ||
+		data->argv[0][0] == '/') && is_command(data, data->argv[0]))
+			c_fork(data);
+		else if (*(data->arg) != '\n')
+		{
+			data->status = 127;
+			error_p(data, "not found\n");
+		}
 	}
-	toks[n] = NULL;
-	return (toks);
+}
+
+/**
+ * c_fork - forks a an exec thread to run cmd
+ * @data: the parameter & return data struct
+ * Return: void
+ */
+
+void c_fork(data_t *data)
+{
+	pid_t pid;
+
+	pid = fork();
+	if (pid == -1)
+	{
+		perror("Error:");
+		return;
+	}
+	if (pid == 0)
+	{
+		if (execve(data->path, data->argv, get_env(data)) == -1)
+		{
+			free_data(data, 1);
+			if (errno == EACCES)
+				exit(126);
+			exit(1);
+		}
+	}
+	else
+	{
+		wait(&(data->status));
+		if (WIFEXITED(data->status))
+		{
+			data->status = WEXITSTATUS(data->status);
+			if (data->status == 126)
+				error_p(data, "Permission denied\n");
+		}
+	}
 }
