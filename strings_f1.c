@@ -70,9 +70,9 @@ void puts(char *string)
 int _putchar(char c)
 {
 	static int a;
-	static char buffer[BUF_SIZE]
+	static char buffer[W_BUF_SIZE]
 
-	if (c == BUF_FLUSH || a >= BUF_SIZE)
+	if (c == BUF_FLUSH || a >= W_BUF_SIZE)
 	{
 		write(1, buffer, a);
 		a = 0;
